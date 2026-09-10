@@ -1,0 +1,63 @@
+body{
+  font-family: 'Lato', sans-serif;
+}
+
+.main-wrapper {
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: soft-light;
+}
+
+.bg-color {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  z-index: -1;
+  background: var(--main-color);
+}
+// header 
+
+.logo {
+  background-color: white;
+  border-radius: 50%;
+  background-position: center;
+  background-size: cover;
+  &.absolute {
+    height: 80px;
+    width: 80px;
+    border: 4px solid white;
+    bottom: -45px;
+    left: 50%;
+    margin-left: -40px;
+  }
+}
+
+.header-title {
+  line-height: 1.2rem;
+}
+
+// Bouncer view
+
+.text-color-calculated {
+  color: var(--text-color);
+}
+
+.svg-color {
+  stroke: var(--text-color);
+}
+
+.btn {
+  border: 1px solid var(--main-color-darken);
+  background-color: var(--main-color);
+  color: var(--text-color);
+  &:hover {
+    background-color: var(--main-color-darken);
+  }
+  &:disabled {
+    opacity: 0.2;
+    cursor: default;
+    &:hover {
+      background-color: var(--main-color);
+    }
+  }
+}

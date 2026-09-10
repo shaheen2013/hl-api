@@ -1,0 +1,68 @@
+image: hotelinking/php7.2
+
+pipelines:
+  branches:
+    develop:
+      - step: #test PSR
+          name: check PSR, pass tests and migrate
+          deployment: test
+          services:
+            - mysql
+          caches:
+            - composer
+          script:
+            - bash /opt/tools/wait_for_mysql.sh
+            - composer install  --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+            - composer psr
+            - php artisan migrate  --database=test --seed
+            - php artisan migrate:refresh  --database=test --seed
+            - composer test
+            - ssh hotelinking@dev-app.hotelinking.com -p 7000 "cd projects/dev/hotelinking_api && git pull && composer install && docker exec hlapi-dev php artisan migrate --seed && docker exec hlapi-dev php artisan queue:restart && docker exec hlapi-dev php artisan config:clear && docker exec hlapi-dev php artisan config:cache && docker exec hlapi-dev php artisan cache:clear"
+          artifacts:
+            - storage/logs/**
+    master:
+      - step: #test PSR
+          name: check PSR, pass tests and migrate
+          deployment: production
+          services:
+            - mysql
+          caches:
+            - composer
+          script:
+            - bash /opt/tools/wait_for_mysql.sh
+            - composer install  --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+            - composer psr
+            - php artisan migrate  --database=test --seed
+            - php artisan migrate:refresh  --database=test  --seed
+            - composer test
+            # - php artisan migrate --seed
+            # - TODO make migrations in hotelinking prod database
+            # - TODO deploy api.hotelinking.com to prod
+
+  pull-requests:
+    '**': #this runs as default for any branch not elsewhere defined
+      - step: #test PSR
+          name: check PSR, pass tests
+          services:
+            - mysql
+          caches:
+            - composer
+          script:
+            - bash /opt/tools/wait_for_mysql.sh
+            - cp .env.pipelines .env
+            - composer install  --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+            - composer psr
+            - php artisan migrate  --database=test --seed
+            - php artisan migrate:refresh  --database=test  --seed
+            - composer test
+          artifacts:
+            - storage/logs/**
+            - report/**
+
+definitions:
+  services:
+    mysql:
+      image: hotelinking/mysql8.0
+      variables:
+        MYSQL_DATABASE: 'test'
+        MYSQL_ROOT_PASSWORD: 'hotelinking'

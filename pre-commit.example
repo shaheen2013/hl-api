@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# Based on code from http://tech.zumba.com/2014/04/14/control-code-quality/
+PROJECT=$(php -r "echo dirname(dirname(dirname(realpath('$0'))));")
+STAGED_FILES_CMD=$(git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\.php)
+DIFF_SUFFIX="_diff"
+PHPCS_SUFFIX="_phpcs.json"
+declare -i ERROR_COUNTER=0
+
+if [ "$#" -eq 1 ]
+then
+    oIFS=$IFS
+    IFS='
+    '
+    SFILES="$1"
+    IFS=$oIFS
+fi
+SFILES=${SFILES:-$STAGED_FILES_CMD}
+
+echo "Checking for errors PHP Lint..."
+
+for FILE in $SFILES
+do
+    php -l -d display_errors=0 $PROJECT/$FILE
+    if [ $? != 0 ]
+    then
+        echo "Fix your errors before commit!"
+        exit 1
+    fi
+    FILES="$FILES $PROJECT/$FILE"
+done
+
+if [ "$FILES" != "" ]
+then
+    echo "Sniffing your code..."
+
+    TMP_DIR=/tmp/$(uuidgen)
+    mkdir -p $TMP_DIR
+    for FILE in $SFILES
+    do
+        mkdir -p $TMP_DIR/$(dirname $FILE)
+        git show :$FILE > $TMP_DIR/$FILE
+        git diff develop $FILE > $TMP_DIR/$FILE$DIFF_SUFFIX
+        $PROJECT/vendor/bin/phpcs --standard=PSR1,PSR12 --ignore=vendor,bootstrap/cache,database,storage --report=json $TMP_DIR/$FILE > $TMP_DIR/$FILE$PHPCS_SUFFIX
+        $PROJECT/vendor/bin/diffFilter --phpcs $TMP_DIR/$FILE$DIFF_SUFFIX $TMP_DIR/$FILE$PHPCS_SUFFIX
+        PHPCS_ERROR=$?
+        ERROR_COUNTER=$ERROR_COUNTER+$PHPCS_ERROR
+        if [ $ERROR_COUNTER != 0 ]
+        then
+            echo "You code stinks. Fixing before commit."
+            $PROJECT/vendor/bin/phpcbf $FILE --standard=PSR1,PSR12 --ignore=vendor,bootstrap/cache,database,storage --report=diff --extensions=php --tab-width=4 -n
+        fi
+    done
+    rm -rf $TMP_DIR
+    if [ $ERROR_COUNTER != 0 ]
+    then
+        git add $PROJECT
+    fi
+fi
+
+exit $?
