@@ -1,6 +1,24 @@
-FROM php:7.2-fpm
+FROM php:7.4-fpm
 
-RUN apt-get update && apt-get install -y libbz2-dev mysql-client libgmp-dev
-RUN docker-php-ext-install pdo_mysql
-RUN docker-php-ext-install bz2
-RUN docker-php-ext-install gmp
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
+    install-php-extensions \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    bz2 \
+    gmp \
+    zip \
+    redis-5.3.7
+
+COPY --from=composer:2.2 /usr/bin/composer /usr/local/bin/composer
+
+WORKDIR /var/www
+
+EXPOSE 9000
+
+CMD ["php-fpm"]

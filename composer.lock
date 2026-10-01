@@ -1675,38 +1675,6 @@
             "time": "2022-06-20T21:43:03+00:00"
         },
         {
-            "name": "hotelinking/libs-services",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "git@bitbucket.org:hotelinking_team/libs-services.git",
-                "reference": "a97ff98789f96bfa4fcba63d378ba586311bba26"
-            },
-            "require": {
-                "aws/aws-php-sns-message-validator": "^1.5",
-                "aws/aws-sdk-php": "^3.81",
-                "justinrainbow/json-schema": "^5.2",
-                "php": ">=7.1.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Hotelinking\\": "src/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "authors": [
-                {
-                    "name": "Hotelinking",
-                    "email": "devs@hotelinking.com"
-                }
-            ],
-            "description": "Common libraries and services",
-            "time": "2021-12-20T11:11:47+00:00"
-        },
-        {
             "name": "justinrainbow/json-schema",
             "version": "5.2.12",
             "source": {
@@ -8928,9 +8896,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "hotelinking/libs-services": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

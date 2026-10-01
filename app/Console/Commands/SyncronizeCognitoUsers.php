@@ -38,8 +38,10 @@ class SyncronizeCognitoUsers extends Command
     {
         parent::__construct();
         $this->congnitoConfig = config('services.aws.cognito-suite');
-        $aws = new Sdk($this->congnitoConfig);
-        $this->cognitoClient = $aws->createCognitoIdentityProvider(["suppress_php_deprecation_warning" => true]);
+        if (!empty($this->congnitoConfig['credentials']['key']) && !empty($this->congnitoConfig['credentials']['secret'])) {
+            $aws = new Sdk($this->congnitoConfig);
+            $this->cognitoClient = $aws->createCognitoIdentityProvider(["suppress_php_deprecation_warning" => true]);
+        }
     }
 
     /**
