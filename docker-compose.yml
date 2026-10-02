@@ -9,7 +9,7 @@ services:
     volumes:
       - ./:/var/www
     ports:
-      - "${DOCKER_APP_PORT:-8000}:80"
+      - "127.0.0.1:${DOCKER_APP_PORT:-8120}:80"
     depends_on:
       - app
     networks:
@@ -39,13 +39,11 @@ services:
   db:
     image: mysql:8.0
     container_name: hlmysql8
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --log-bin-trust-function-creators=1 --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: hotelinking_app_local
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -58,8 +56,6 @@ services:
     image: redis:6-alpine
     container_name: hlredis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
